@@ -1,24 +1,24 @@
-GET http://localhost:3000/transactions
+GET http://localhost:3001/transactions
 
 ###
 
-GET http://localhost:3000/transactions?search=Improve&page=1&perPage=10
-
-
-###
-
-GET http://localhost:3000/statistics?month=2021-11
-
-###
-
-GET http://localhost:3000/bar-chart?month=2021-11
+GET http://localhost:3001/transactions?page=2&perPage=10&search=Fjallraven
 
 
 ###
 
-GET http://localhost:3000/pie-chart?month=2021-11
+GET http://localhost:3001/statistics?month=2021-11
+
+###
+
+GET http://localhost:3001/bar-chart?month=2021-11
 
 
 ###
 
-GET http://localhost:3000/combined-data
+GET http://localhost:3001/pie-chart?month=2021-11
+
+
+###
+
+GET http://localhost:3001/combined-data

@@ -3,12 +3,14 @@ const { open } = require("sqlite");
 const sqlite3 = require("sqlite3");
 const axios = require("axios");
 const path = require("path");
+const cors = require("cors");
 
 const databasePath = path.join(__dirname, "transaction.db");
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 let database = null;
 
@@ -32,8 +34,8 @@ const initializeDbAndServer = async () => {
       );
     `);
 
-    app.listen(3000, () =>
-      console.log("Server Running at http://localhost:3000/")
+    app.listen(3001, () =>
+      console.log("Server Running at http://localhost:3001/")
     );
   } catch (error) {
     console.log(`DB Error: ${error.message}`);
@@ -86,26 +88,28 @@ setTimeout(() => {
 app.get("/transactions", async (req, res) => {
   try {
     const { search = "", page = 1, perPage = 10 } = req.query;
-
     const offset = (page - 1) * perPage;
 
     let searchCondition = "";
+    let params = [perPage, offset];
+
     if (search) {
       searchCondition = `
-        WHERE title LIKE '%${search}%' OR
-              description LIKE '%${search}%' OR
-              price LIKE '%${search}%'
+        WHERE title LIKE ? OR
+              description LIKE ? OR
+              price LIKE ?
       `;
+      params = [`%${search}%`, `%${search}%`, `%${search}%`, perPage, offset];
     }
 
     const query = `
       SELECT * FROM transactionTable
       ${searchCondition}
       ORDER BY id
-      LIMIT ${perPage} OFFSET ${offset}
+      LIMIT ? OFFSET ?
     `;
 
-    const transactions = await database.all(query);
+    const transactions = await database.all(query, params);
 
     res.json(transactions);
   } catch (error) {
@@ -205,7 +209,7 @@ app.get("/pie-chart", async (req, res) => {
 const getTotalStatistics = async (month) => {
   try {
     const response = await axios.get(
-      `http://localhost:3000/statistics?month=${month}`
+      `http://localhost:3001/statistics?month=${month}`
     );
     return response.data;
   } catch (error) {
@@ -217,7 +221,7 @@ const getTotalStatistics = async (month) => {
 const getBarChartData = async (month) => {
   try {
     const response = await axios.get(
-      `http://localhost:3000/bar-chart?month=${month}`
+      `http://localhost:3001/bar-chart?month=${month}`
     );
     return response.data;
   } catch (error) {
@@ -229,7 +233,7 @@ const getBarChartData = async (month) => {
 const getPieChartData = async (month) => {
   try {
     const response = await axios.get(
-      `http://localhost:3000/pie-chart?month=${month}`
+      `http://localhost:3001/pie-chart?month=${month}`
     );
     return response.data;
   } catch (error) {
@@ -260,3 +264,5 @@ app.get("/combined-data", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+module.exports = app;

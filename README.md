@@ -18,3 +18,35 @@ The price ranges are predefined, such as 0-100, 101-200, etc.
 Generate a pie chart showing the unique categories of products and the number of items from each category for the selected month.
 
 5). Create an API that fetches data from the three APIs mentioned above and combines the responses to provide a comprehensive report on product transactions for the selected month.
+
+app.get("/transactions", async (req, res) => {
+try {
+const { search = "", page = 1, perPage = 10 } = req.query;
+
+    const offset = (page - 1) * perPage;
+
+    let searchCondition = "";
+    if (search) {
+      searchCondition = `
+        WHERE title LIKE '%${search}%' OR
+              description LIKE '%${search}%' OR
+              price LIKE '%${search}%'
+      `;
+    }
+
+    const query = `
+      SELECT * FROM transactionTable
+      ${searchCondition}
+      ORDER BY id
+      LIMIT ${perPage} OFFSET ${offset}
+    `;
+
+    const transactions = await database.all(query);
+
+    res.json(transactions);
+
+} catch (error) {
+console.error(`List Transactions Error: ${error.message}`);
+res.status(500).json({ error: "Internal Server Error" });
+}
+});
