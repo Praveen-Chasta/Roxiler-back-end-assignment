@@ -2,7 +2,7 @@ GET http://localhost:3001/transactions
 
 ###
 
-GET http://localhost:3001/transactions?page=2&perPage=10&search=Fjallraven
+GET http://localhost:3001/transactions?page=1
 
 
 ###

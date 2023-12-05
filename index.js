@@ -82,7 +82,7 @@ async function getData(url) {
 }
 
 setTimeout(() => {
-  getData("https://s3.amazonaws.com/roxiler.com/product_transaction.json");
+  getData(" https://s3.amazonaws.com/roxiler.com/product_transaction.json");
 }, 5000);
 
 app.get("/transactions", async (req, res) => {
