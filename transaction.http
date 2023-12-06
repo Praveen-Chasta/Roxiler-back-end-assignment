@@ -2,21 +2,21 @@ GET http://localhost:3001/transactions
 
 ###
 
-GET http://localhost:3001/transactions?page=1
+GET http://localhost:3001/transactions-search?search=SiliconPower&page=6&perPage=10&month=01
 
 
 ###
 
-GET http://localhost:3001/statistics?month=2021-11
+GET http://localhost:3001/statistics?month=2019-05
 
 ###
 
-GET http://localhost:3001/bar-chart?month=2021-11
+GET http://localhost:3001/bar-chart?month=12
 
 
 ###
 
-GET http://localhost:3001/pie-chart?month=2021-11
+GET http://localhost:3001/pie-chart?month=11
 
 
 ###

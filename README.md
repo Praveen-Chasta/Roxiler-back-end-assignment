@@ -50,3 +50,41 @@ console.error(`List Transactions Error: ${error.message}`);
 res.status(500).json({ error: "Internal Server Error" });
 }
 });
+
+app.get("/bar-chart", async (req, res) => {
+try {
+const { month } = req.query;
+
+    const priceRanges = [
+      { min: 0, max: 100 },
+      { min: 101, max: 200 },
+      { min: 201, max: 300 },
+      { min: 301, max: 400 },
+      { min: 401, max: 500 },
+      { min: 501, max: 600 },
+      { min: 601, max: 700 },
+      { min: 701, max: 800 },
+      { min: 801, max: 900 },
+      { min: 901, max: Above },
+    ];
+
+    const priceRangesData = await Promise.all(
+      priceRanges.map(async (range) => {
+        const { min, max } = range;
+
+        const result = await database.get(
+          "SELECT COUNT(*) AS count FROM transactionTable WHERE strftime('%Y-%m', dateOfSale) = ? AND price >= ? AND price <= ?",
+          [month, min, max]
+        );
+
+        return { range: `${min}-${max}`, count: result.count || 0 };
+      })
+    );
+
+    res.json(priceRangesData);
+
+} catch (error) {
+console.error(`Bar Chart Error: ${error.message}`);
+res.status(500).json({ error: "Internal Server Error" });
+}
+});

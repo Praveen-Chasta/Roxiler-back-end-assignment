@@ -86,30 +86,38 @@ setTimeout(() => {
 }, 5000);
 
 app.get("/transactions", async (req, res) => {
+  const query = `
+      SELECT * FROM transactionTable`;
+  const transactions = await database.all(query);
+  res.send(transactions);
+});
+
+app.get("/transactions-search", async (req, res) => {
   try {
     const { search = "", page = 1, perPage = 10 } = req.query;
+
     const offset = (page - 1) * perPage;
 
     let searchCondition = "";
-    let params = [perPage, offset];
-
     if (search) {
       searchCondition = `
-        WHERE title LIKE ? OR
-              description LIKE ? OR
-              price LIKE ?
+       WHERE title LIKE '%${search}%' OR
+              description LIKE '%${search}%' OR
+              price LIKE '%${search}%' OR
+              strftime('%Y-%m', dateOfSale) = '${month}' OR
+              strftime('%Y', dateOfSale) = '${month}' OR
+              strftime('%d', dateOfSale) = '${month}'
       `;
-      params = [`%${search}%`, `%${search}%`, `%${search}%`, perPage, offset];
     }
 
     const query = `
       SELECT * FROM transactionTable
       ${searchCondition}
       ORDER BY id
-      LIMIT ? OFFSET ?
+      LIMIT ${perPage} OFFSET ${offset}
     `;
 
-    const transactions = await database.all(query, params);
+    const transactions = await database.all(query);
 
     res.json(transactions);
   } catch (error) {
@@ -155,6 +163,7 @@ app.get("/bar-chart", async (req, res) => {
   try {
     const { month } = req.query;
 
+    // Define price ranges
     const priceRanges = [
       { min: 0, max: 100 },
       { min: 101, max: 200 },
@@ -165,7 +174,7 @@ app.get("/bar-chart", async (req, res) => {
       { min: 601, max: 700 },
       { min: 701, max: 800 },
       { min: 801, max: 900 },
-      { min: 901, max: Infinity },
+      { min: 901, max: 1000 },
     ];
 
     const priceRangesData = await Promise.all(
@@ -173,7 +182,7 @@ app.get("/bar-chart", async (req, res) => {
         const { min, max } = range;
 
         const result = await database.get(
-          "SELECT COUNT(*) AS count FROM transactionTable WHERE strftime('%Y-%m', dateOfSale) = ? AND price >= ? AND price <= ?",
+          "SELECT COUNT(*) AS count FROM transactionTable WHERE strftime('%m', dateOfSale) = ? AND price >= ? AND price <= ?",
           [month, min, max]
         );
 
