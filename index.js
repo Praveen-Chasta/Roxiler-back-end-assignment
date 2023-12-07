@@ -94,7 +94,7 @@ app.get("/transactions", async (req, res) => {
 
 app.get("/transactions-search", async (req, res) => {
   try {
-    const { search = "", page = 1, perPage = 10 } = req.query;
+    const { search = "", page = 1, perPage = 10, month } = req.query;
 
     const offset = (page - 1) * perPage;
 
@@ -131,19 +131,19 @@ app.get("/statistics", async (req, res) => {
     const { month } = req.query;
 
     const totalSaleAmountResult = await database.get(
-      "SELECT SUM(price) AS totalSaleAmount FROM transactionTable WHERE strftime('%Y-%m', dateOfSale) = ? AND sold = 1",
+      "SELECT SUM(price) AS totalSaleAmount FROM transactionTable WHERE strftime('%m', dateOfSale) = ? AND sold = 1",
       [month]
     );
     const totalSaleAmount = totalSaleAmountResult.totalSaleAmount || 0;
 
     const totalSoldResult = await database.get(
-      "SELECT COUNT(*) AS totalSold FROM transactionTable WHERE strftime('%Y-%m', dateOfSale) = ? AND sold = 1",
+      "SELECT COUNT(*) AS totalSold FROM transactionTable WHERE strftime('%m', dateOfSale) = ? AND sold = 1",
       [month]
     );
     const totalSold = totalSoldResult.totalSold || 0;
 
     const totalNotSoldResult = await database.get(
-      "SELECT COUNT(*) AS totalNotSold FROM transactionTable WHERE strftime('%Y-%m', dateOfSale) = ? AND sold = 0",
+      "SELECT COUNT(*) AS totalNotSold FROM transactionTable WHERE strftime('%m', dateOfSale) = ? AND sold = 0",
       [month]
     );
     const totalNotSold = totalNotSoldResult.totalNotSold || 0;
@@ -163,7 +163,6 @@ app.get("/bar-chart", async (req, res) => {
   try {
     const { month } = req.query;
 
-    // Define price ranges
     const priceRanges = [
       { min: 0, max: 100 },
       { min: 101, max: 200 },
@@ -202,7 +201,7 @@ app.get("/pie-chart", async (req, res) => {
     const { month } = req.query;
 
     const categoriesData = await database.all(
-      "SELECT category, COUNT(*) AS count FROM transactionTable WHERE strftime('%Y-%m', dateOfSale) = ? GROUP BY category",
+      "SELECT category, COUNT(*) AS count FROM transactionTable WHERE strftime('%m', dateOfSale) = ? GROUP BY category",
       [month]
     );
 
